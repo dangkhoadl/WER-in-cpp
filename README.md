@@ -7,6 +7,7 @@
 #### Usage
 
 ```bash
+chmod +x analyze_wer
 ./analyze_wer [Reference] [Hypothesis]
 ```
 
