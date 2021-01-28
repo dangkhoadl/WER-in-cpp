@@ -1,10 +1,13 @@
 #include <iostream>
 #include <vector>
+#include <map>
+#include <unordered_map>
 #include <string>
 #include <fstream>
 #include <string>
 #include <sstream>
 #include <codecvt>
+#include <cmath>
 #include ".//wer//wer.h"
 
 using namespace std;
@@ -28,9 +31,23 @@ int main(int agrc, char *argv[]) {
             return 1;
         }
 
-        vector<string> references;
+        map<string,
+            unordered_map<string, vector<string>>> data;
+
         for (string line(""); getline(ref_file, line);) {
-            references.push_back(line);
+            // Split ID and text
+            vector<string> all_words = split(line, ' ');
+            if(all_words.size() == 0) {
+                cout << "Empty line in [REF] !!! Require atleast utterance ID in each line" << endl;
+                return 1;
+            }
+            string id = all_words[0];
+            vector<string> text(all_words.begin()+1, all_words.end());
+
+            data.insert( {id, {
+                {"REF", text},
+                {"HYP", vector<string>()}
+            }});
         }
         ref_file.close();
 
@@ -42,26 +59,36 @@ int main(int agrc, char *argv[]) {
             return 1;
         }
 
-        vector<string> hypotheses;
         for (string line(""); getline(hyp_file, line);) {
-            hypotheses.push_back(line);
+            // Split ID and text
+            vector<string> all_words = split(line, ' ');
+            if(all_words.size() == 0) {
+                cout << "Empty line in [HYP] !!! Require atleast utterance ID in each line" << endl;
+                return 1;
+            }
+            string id = all_words[0];
+            vector<string> text(all_words.begin()+1, all_words.end());
+
+
+            if(data.count(id) == NULL) {
+                cout << id << " not appeare in [REF]" << endl;
+                return 1;
+            }
+
+            data.at(id).at("HYP") = text;
         }
         hyp_file.close();
 
         // Run program
-        if (references.size() != hypotheses.size()) {
-            cout << "Hypothesis and Reference sizes mismatch !!!" << endl;
-            return 1;
-        }
-
-        vector<string> ref, hyp;
-        for(int i=0; i<references.size(); ++i) {
-            ref = split(references[i], ' ');
-            hyp = split(hypotheses[i], ' ');
+        for(const auto &it:data) {
+            string id = it.first;
+            vector<string> ref = it.second.at("REF");
+            vector<string> hyp = it.second.at("HYP");
 
             WER wer(ref, hyp);
-            wer.get_wer();
-            cout << endl;
+            cout << "ID : " << id << endl;
+            double wer_result = wer.get_wer();
+            cout << "<For_parsing>," << id << ',' << roundf(wer_result * 10000) / 10000 << endl << endl;
         }
         return 0;
     }

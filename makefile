@@ -9,6 +9,7 @@ all: $(SOURCES) $(EXE)
 
 build:
 	make all
+	./$(EXE) samples//ref samples//hyp
 
 test:
 	./$(EXE) samples//ref samples//hyp

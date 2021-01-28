@@ -85,7 +85,7 @@ public:
         substitutes = 0;
         deletes = 0;
     }
-    void get_wer() {
+    double get_wer() {
         // build the matrix
         __calculate_edit_distance();
 
@@ -265,5 +265,8 @@ public:
             << "[ "  << d[r.size()][h.size()] << " / " << r.size() << ", "\
             << inserts << " ins, " << deletes << " del, " << substitutes << " sub ]"
             << endl;
+
+        // Return wer
+        return wer;
     }
 };
