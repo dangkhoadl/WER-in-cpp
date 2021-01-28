@@ -4,6 +4,7 @@
 #include <string>
 #include <algorithm>
 #include <string>
+#include <unordered_map>
 #include <codecvt>
 #include <locale>
 
@@ -76,6 +77,75 @@ private:
         }
         reverse(step_list.begin(), step_list.end());
     }
+
+    unordered_map<string, double> __solve_edgecase_1() {
+        /* Case: ref is empty and hyp is empty
+        */
+        // print WER
+        cout << "REF: " << endl;
+        cout << "HYP: " << endl;
+        cout << "EVA: " << endl;
+        cout << endl << "WER: 0% [ 0 / 0, 0 ins, 0 del, 0 sub ]" << endl;
+
+        // Return wer, inserts, deletes, substitutes
+        return unordered_map<string, double>({
+            {"WER", static_cast<double>(0)},
+            {"INS", static_cast<double>(0)}, {"DEL", static_cast<double>(0)}, {"SUB", static_cast<double>(0)}
+        });
+    }
+
+    unordered_map<string, double> __solve_edgecase_2() {
+        /* Case: ref is not empty but hyp is empty
+        */
+        wstring_convert<codecvt_utf8<char32_t>, char32_t> conv;
+
+        // print WER
+        cout << "REF: ";
+        for(const string &word:r) cout << word << ' ';
+        cout << endl;
+        cout << "HYP: " << endl;
+        cout << "EVA: ";
+        for(const string &word:r) {
+            string tmp(conv.from_bytes(word).size()-1, ' ');
+            cout << 'D' << tmp << ' ';
+        }
+        cout << endl << "WER: 100% " \
+            << "[ "  << r.size() << " / " << r.size() << ", 0 ins, " << r.size() << " del, 0 sub ]" \
+            << endl;
+
+        // Return wer, inserts, deletes, substitutes
+        return unordered_map<string, double>({
+            {"WER", static_cast<double>(100)},
+            {"INS", static_cast<double>(0)}, {"DEL", static_cast<double>(r.size())}, {"SUB", static_cast<double>(0)}
+        });
+    }
+
+    unordered_map<string, double> __solve_edgecase_3() {
+        /* Case: ref is empty but hyp is not empty
+        */
+        wstring_convert<codecvt_utf8<char32_t>, char32_t> conv;
+
+        // print WER
+        cout << "REF: "  << endl;
+        cout << "HYP: ";
+        for(const string &word:h) cout << word << ' ';
+        cout << endl;
+        cout << "EVA: ";
+        for(const string &word:h) {
+            string tmp(conv.from_bytes(word).size()-1, ' ');
+            cout << 'I' << tmp << ' ';
+        }
+        cout << endl << "WER: Infinite% " \
+            << "[ "  << h.size() << " / 0, " << h.size() << " ins, 0 del, 0 sub ]" \
+            << endl;
+
+        // Return wer, inserts, deletes, substitutes
+        return unordered_map<string, double>({
+            {"WER", static_cast<double>(100)},
+            {"INS", static_cast<double>(static_cast<double>(h.size()))}, {"DEL", static_cast<double>(0)}, {"SUB", static_cast<double>(0)}
+        });
+    }
+
 public:
     WER(const vector<string> &ref_words, const vector<string> &hyp_words) : r(ref_words), h(hyp_words) {
         d.assign(r.size()+1, vector<unsigned>(h.size()+1, 0));
@@ -85,7 +155,11 @@ public:
         substitutes = 0;
         deletes = 0;
     }
-    double get_wer() {
+    unordered_map<string, double> get_wer() {
+        if(r.size() == 0 && h.size() == 0) return __solve_edgecase_1();
+        if(r.size() > 0 && h.size() == 0) return __solve_edgecase_2();
+        if(r.size() == 0 && h.size() > 0) return __solve_edgecase_3();
+
         // build the matrix
         __calculate_edit_distance();
 
@@ -266,7 +340,10 @@ public:
             << inserts << " ins, " << deletes << " del, " << substitutes << " sub ]"
             << endl;
 
-        // Return wer
-        return wer;
+        // Return wer, inserts, deletes, substitutes
+        return unordered_map<string, double>({
+            {"WER", wer},
+            {"INS", static_cast<double>(inserts)}, {"DEL", static_cast<double>(deletes)}, {"SUB", static_cast<double>(substitutes)}
+        });
     }
 };

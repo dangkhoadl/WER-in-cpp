@@ -11,6 +11,7 @@
 #include ".//wer//wer.h"
 
 using namespace std;
+const double ZERO_TOLERANCE = 1e-6;
 
 vector<string> split(const string &str, char delim) {
     vector<string> result;
@@ -80,16 +81,51 @@ int main(int agrc, char *argv[]) {
         hyp_file.close();
 
         // Run program
+        unsigned n_word_ref = 0, inserts = 0, deletes = 0, substitutes = 0;
+        unsigned total_error_sentences = 0;
+        unsigned total_not_in_hyp_sentences = 0;
         for(const auto &it:data) {
             string id = it.first;
             vector<string> ref = it.second.at("REF");
             vector<string> hyp = it.second.at("HYP");
 
+            // utterance stats
             WER wer(ref, hyp);
             cout << "ID : " << id << endl;
-            double wer_result = wer.get_wer();
-            cout << "<For_parsing>," << id << ',' << roundf(wer_result * 10000) / 10000 << endl << endl;
+            unordered_map<string, double> result = wer.get_wer();
+            double utt_wer = result["WER"];
+            cout << "<For_parsing>," << id << ',' << roundf(utt_wer * 10000) / 10000 << endl << endl;
+
+            // Update global stats
+            n_word_ref += ref.size();
+            inserts += static_cast<unsigned>(result["INS"]);
+            deletes += static_cast<unsigned>(result["DEL"]);
+            substitutes += static_cast<unsigned>(result["SUB"]);
+            if( abs(utt_wer) > ZERO_TOLERANCE ) total_error_sentences += 1;
+            if(hyp.size() == 0 && ref.size() > 0) total_not_in_hyp_sentences += 1;
         }
+
+        // Summarize global stats
+        unsigned total_errors = inserts + deletes + substitutes;
+        unsigned total_sentences =  data.size();
+        double global_wer = static_cast<double>(total_errors) / n_word_ref * 100.0;
+        global_wer = roundf(global_wer * 10000) / 10000;
+        double ser = static_cast<double>(total_error_sentences) / total_sentences * 100.0;
+
+        cout << endl << "#### Global Statistics ####" << endl \
+            << "%WER " << global_wer << "% " \
+            << "[ "  << total_errors << " / " << n_word_ref << ", " \
+            << inserts << " ins, " << deletes << " del, " << substitutes << " sub ]"
+            << endl;
+
+        cout << "%SER " << ser << "% " \
+            << "[ "  << total_error_sentences << " / " << total_sentences << " ]" \
+            << endl;
+
+        cout << "Scored " << total_sentences << " sentences, " \
+            << total_not_in_hyp_sentences << " not present in hyp." \
+            << endl;
+
         return 0;
     }
     else {

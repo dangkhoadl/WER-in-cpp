@@ -1,9 +1,9 @@
 CC=g++
 CFLAGS=-w -O2 -c -std=c++11
 LDFLAGS=
-SOURCES=analyze_wer.cpp
+SOURCES=compute-wer.cpp
 OBJECTS=$(SOURCES:.cpp=.o)
-EXE=analyze_wer
+EXE=compute-wer
 
 all: $(SOURCES) $(EXE)
 
