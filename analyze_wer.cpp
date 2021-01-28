@@ -30,7 +30,7 @@ int main(int agrc, char *argv[]) {
 
         vector<string> references;
         for (string line(""); getline(ref_file, line);) {
-            if(line != "") references.push_back(line);
+            references.push_back(line);
         }
         ref_file.close();
 
@@ -44,7 +44,7 @@ int main(int agrc, char *argv[]) {
 
         vector<string> hypotheses;
         for (string line(""); getline(hyp_file, line);) {
-            if(line != "") hypotheses.push_back(line);
+            hypotheses.push_back(line);
         }
         hyp_file.close();
 
