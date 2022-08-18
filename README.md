@@ -12,7 +12,6 @@ cd WER-in-cpp
 make build
 ```
 
-
 #### Usage
 
 ```bash
