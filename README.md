@@ -4,6 +4,15 @@
     + Support multi-line reference and hypothesis
     + Improve the runtime and feasibility when aligning long sentences
 
+#### build
+
+```bash
+git clone https://github.com/dangkhoadl/WER-in-cpp.git
+cd WER-in-cpp
+make build
+```
+
+
 #### Usage
 
 ```bash
