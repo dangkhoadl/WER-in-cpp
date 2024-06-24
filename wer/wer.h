@@ -52,7 +52,7 @@ private:
         unsigned hyp_ptr = h.size();
 
         while(true) {
-            if (ref_ptr == 0 || hyp_ptr == 0) {
+            if (ref_ptr == 0 && hyp_ptr == 0) {
                 break;
             } else if (ref_ptr >= 1 && hyp_ptr >= 1 && d[ref_ptr][hyp_ptr] == d[ref_ptr-1][hyp_ptr-1] && r[ref_ptr-1] == h[hyp_ptr-1]) {
                 step_list.push_back('e');
